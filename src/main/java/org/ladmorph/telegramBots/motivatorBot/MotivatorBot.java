@@ -1,30 +1,43 @@
 package org.ladmorph.telegramBots.motivatorBot;
 
+import org.ladmorph.telegramBots.config.BotConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class MotivatorBot extends TelegramLongPollingBot {
 
+    private final Logger log = LoggerFactory.getLogger(MotivatorBot.class);
     private final MotivatorBotCommands motivatorBotCommands = new MotivatorBotCommands();
 
+
+    public MotivatorBot() {
+    }
+
     public void onUpdateReceived(Update update) {
-        String textMessage = update.getMessage().getText();
+        if (update.hasMessage()) {
+            String textMessage = update.getMessage().getText();
 
-        if (textMessage.equals("/start")) {
-            motivatorBotCommands.start(update, this);
-        }
+            if (textMessage.equals("/start")) {
+                motivatorBotCommands.start(update, this);
+            }
 
-        if (textMessage.equals("/help")) {
-            motivatorBotCommands.help(update, this);
+            if (textMessage.equals("/help")) {
+                motivatorBotCommands.help(update, this);
+            }
         }
     }
 
     public String getBotUsername() {
-        return "super_motivation_bot";
+        return BotConfig.MOTIVATOR_USERNAME;
     }
 
     public String getBotToken() {
-        return "1108645653:AAE0kD1pP6dO-0teYSboB5uYmmFVa6-7xpw";
+        return BotConfig.MOTIVATOR_TOKEN;
     }
 
 }
