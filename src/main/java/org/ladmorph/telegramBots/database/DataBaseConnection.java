@@ -16,7 +16,8 @@ public class DataBaseConnection {
     private static final String password = "1234";
 
 
-    private DataBaseConnection() {}
+    private DataBaseConnection() {
+    }
 
     public static Connection getConnection() {
         Connection connection = null;

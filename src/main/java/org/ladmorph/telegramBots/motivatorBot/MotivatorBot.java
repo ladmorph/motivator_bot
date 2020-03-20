@@ -21,22 +21,30 @@ public class MotivatorBot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
             String textMessage = update.getMessage().getText();
 
-            if (dataBaseManager.getUserState(update.getMessage().getFrom().getId())) {
-                dataBaseManager.setUserState(update.getMessage().getFrom().getId(), false);
-                if (update.hasMessage()) {
-                    System.out.println(update.getMessage().getText());
-                }
-            }
             if (textMessage.equals("/start")) {
                 motivatorBotCommands.start(update, this);
             }
 
             if (textMessage.equals("/help")) {
                 motivatorBotCommands.help(update, this);
+            }
+
+            if (textMessage.equals("/add_task")) {
+                motivatorBotCommands.addTask(update, this);
                 dataBaseManager.setUserState(update.getMessage().getFrom().getId(), true);
+            } else {
+                motivatorBotCommands.handleAddTask(update, this);
+            }
+            if (textMessage.equals("/get_tasks")) {
+                motivatorBotCommands.getTasks(update, this);
             }
         }
-    }
+        if (update.hasCallbackQuery()) {
+            dataBaseManager.setUserState(update.getCallbackQuery().getFrom().getId(), true);
+            motivatorBotCommands.addTask(update, this);
+            }
+
+        }
 
     public String getBotUsername() {
         return BotConfig.MOTIVATOR_USERNAME;
