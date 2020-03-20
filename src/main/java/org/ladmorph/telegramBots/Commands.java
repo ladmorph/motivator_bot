@@ -8,6 +8,4 @@ public interface Commands {
     void start(Update update, AbsSender absSender);
 
     void help(Update update, AbsSender absSender);
-
-    void addTask(Update update, AbsSender absSender);
 }
