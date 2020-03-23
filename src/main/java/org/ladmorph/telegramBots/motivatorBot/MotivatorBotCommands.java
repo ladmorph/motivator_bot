@@ -33,7 +33,8 @@ public class MotivatorBotCommands implements Commands {
         SendMessage message = new SendMessage()
                 .enableMarkdown(true)
                 .setChatId(update.getMessage().getChatId())
-                .setText(BotConfig.MOTIVATOR_START_MESSAGE);
+                .setText(BotConfig.MOTIVATOR_START_MESSAGE)
+                .enableHtml(true);
 
         SendAnimation sendAnimation = new SendAnimation()
                 .setChatId(update.getMessage().getChatId())
@@ -106,17 +107,10 @@ public class MotivatorBotCommands implements Commands {
             dataBaseManager.setUserState(update.getMessage().getFrom().getId(), false);
             if (update.hasMessage()) {
                 String task = update.getMessage().getText();
-                if (commands.contains(task)) {
-                    SendMessage sendMessage = new SendMessage()
-                            .setChatId(update.getMessage().getChatId())
-                            .setText(BotConfig.MOTIVATOR_HANDLE_TASKS_MESSAGE_FAILURE)
-                            .enableMarkdown(true);
 
-                    try {
-                        absSender.execute(sendMessage);
-                    } catch (TelegramApiException e) {
-                        log.error(e.getMessage(), e);
-                    }
+                if (commands.contains(task)) {
+                    sendFailureMessage(update, absSender);
+                    return;
                 }
 
                 int idByUserId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
@@ -125,7 +119,7 @@ public class MotivatorBotCommands implements Commands {
                     SendMessage sendMessage = new SendMessage()
                             .setChatId(update.getMessage().getChatId())
                             .setText(BotConfig.MOTIVATOR_HANDLE_TASKS_MESSAGE_SUCCESS)
-                            .enableMarkdown(true)
+                            .enableHtml(true)
                             .setReplyMarkup(markupKeyboard);
 
                     try {
@@ -147,7 +141,26 @@ public class MotivatorBotCommands implements Commands {
         int idByUserId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
         SendMessage sendMessage = new SendMessage()
                 .setChatId(update.getMessage().getChatId())
-                .setText("Ваши задачи на сегодня \uD83D\uDE1C:\n" + String.join("\n", dataBaseManager.fetchAllTaskByUserId(idByUserId)));
+                .enableHtml(true)
+                .setText("<b>Ваши задачи на сегодня:</b>\n\n" + "<em>"
+                        + String.join("\n", dataBaseManager.fetchAllTaskByUserId(idByUserId)) + "</em>");
+
+        try {
+            absSender.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @param update    - this object stores all the necessary information about the user who sent the message
+     * @param absSender - this object is responsible for sending a message to the user
+     */
+    private void sendFailureMessage(Update update, AbsSender absSender) {
+        SendMessage sendMessage = new SendMessage()
+                .setChatId(update.getMessage().getChatId())
+                .setText(BotConfig.MOTIVATOR_MESSAGE_FAILURE)
+                .enableHtml(true);
 
         try {
             absSender.execute(sendMessage);
