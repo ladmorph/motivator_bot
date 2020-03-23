@@ -157,6 +157,17 @@ public class DataBaseManager {
             e.printStackTrace();
         }
     }
+
+    public void deleteAllTaskByUserId(Integer userId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "DELETE FROM tasks WHERE user_id = " + userId
+            );
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 

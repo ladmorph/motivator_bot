@@ -14,4 +14,8 @@ public class BotConfig {
     public final static String MOTIVATOR_START_MESSAGE =
             "<b>Тебя приветствтует Мотиватор бот!</b>" +
             "\nДля просмотора команд выполните команду /help";
+
+    public final static String DEFAULT_MESSAGE = "Я тебя не понимаю.";
+
+    public final static String MOTIVATOR_DELETE_TASK_MESSAGE = "Ваши задания успешно выполнены!";
 }

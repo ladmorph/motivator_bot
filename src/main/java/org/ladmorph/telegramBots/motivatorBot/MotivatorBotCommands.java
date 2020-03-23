@@ -96,13 +96,11 @@ public class MotivatorBotCommands implements Commands {
     public void handleAddTask(Update update, AbsSender absSender) {
         if (dataBaseManager.getUserState(update.getMessage().getFrom().getId())) {
 
-            List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-            List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
-            inlineKeyboardButtons.add(new InlineKeyboardButton().setText("Добавить еще одну задачу!").setCallbackData("1"));
-            buttons.add(inlineKeyboardButtons);
 
-            InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
-            markupKeyboard.setKeyboard(buttons);
+            List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
+            inlineKeyboardButtons.add(new InlineKeyboardButton().setText("Добавить еще одну задачу!").setCallbackData("task"));
+
+            InlineKeyboardMarkup markupKeyboard = setUpInlineKeyboardMarkup(inlineKeyboardButtons);
 
             dataBaseManager.setUserState(update.getMessage().getFrom().getId(), false);
             if (update.hasMessage()) {
@@ -113,8 +111,8 @@ public class MotivatorBotCommands implements Commands {
                     return;
                 }
 
-                int idByUserId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
-                if (dataBaseManager.addTask(task, idByUserId)) {
+                int userId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
+                if (dataBaseManager.addTask(task, userId)) {
 
                     SendMessage sendMessage = new SendMessage()
                             .setChatId(update.getMessage().getChatId())
@@ -138,12 +136,20 @@ public class MotivatorBotCommands implements Commands {
      * @param absSender - this object is responsible for sending a message to the user
      */
     public void getTasks(Update update, AbsSender absSender) {
+
+        List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
+        inlineKeyboardButtons.add(new InlineKeyboardButton().setText("Завершить все задачи!").setCallbackData("delete_task"));
+
+        InlineKeyboardMarkup markupKeyboard = setUpInlineKeyboardMarkup(inlineKeyboardButtons);
+
         int idByUserId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
+
         SendMessage sendMessage = new SendMessage()
                 .setChatId(update.getMessage().getChatId())
                 .enableHtml(true)
                 .setText("<b>Ваши задачи на сегодня:</b>\n\n" + "<em>"
-                        + String.join("\n", dataBaseManager.fetchAllTaskByUserId(idByUserId)) + "</em>");
+                        + String.join("\n", dataBaseManager.fetchAllTaskByUserId(idByUserId)) + "</em>")
+                .setReplyMarkup(markupKeyboard);
 
         try {
             absSender.execute(sendMessage);
@@ -161,6 +167,60 @@ public class MotivatorBotCommands implements Commands {
                 .setChatId(update.getMessage().getChatId())
                 .setText(BotConfig.MOTIVATOR_MESSAGE_FAILURE)
                 .enableHtml(true);
+
+        try {
+            absSender.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private InlineKeyboardMarkup setUpInlineKeyboardMarkup(List<InlineKeyboardButton> buttonList) {
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        buttons.add(buttonList);
+
+        InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
+        markupKeyboard.setKeyboard(buttons);
+
+        return markupKeyboard;
+    }
+
+
+    /**
+     * @param update    - this object stores all the necessary information about the user who sent the message
+     * @param absSender - this object is responsible for sending a message to the user
+     */
+    public void deleteAllTask(Update update, AbsSender absSender) {
+        int userId = 0;
+
+        SendMessage sendMessage = new SendMessage();
+        try {
+            sendMessage.setChatId(update.getMessage().getChatId());
+            userId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
+        } catch (NullPointerException e) {
+            sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
+            userId = dataBaseManager.getIdByUserId(update.getCallbackQuery().getFrom().getId());
+        }
+
+        sendMessage.setText(BotConfig.MOTIVATOR_DELETE_TASK_MESSAGE);
+        dataBaseManager.deleteAllTaskByUserId(userId);
+
+        try {
+            absSender.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+
+    /**
+     * @param update    - this object stores all the necessary information about the user who sent the message
+     * @param absSender - this object is responsible for sending a message to the user
+     */
+    public void sendDefaultMessage(Update update, AbsSender absSender) {
+        SendMessage sendMessage = new SendMessage()
+                .setChatId(update.getMessage().getChatId())
+                .setText(BotConfig.DEFAULT_MESSAGE);
 
         try {
             absSender.execute(sendMessage);
