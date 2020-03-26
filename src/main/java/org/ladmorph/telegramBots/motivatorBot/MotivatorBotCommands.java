@@ -99,7 +99,6 @@ public class MotivatorBotCommands implements Commands {
 
             List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
             inlineKeyboardButtons.add(new InlineKeyboardButton().setText("Добавить еще одну задачу!").setCallbackData("task"));
-
             InlineKeyboardMarkup markupKeyboard = setUpInlineKeyboardMarkup(inlineKeyboardButtons);
 
             dataBaseManager.setUserState(update.getMessage().getFrom().getId(), false);
@@ -139,7 +138,6 @@ public class MotivatorBotCommands implements Commands {
 
         List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
         inlineKeyboardButtons.add(new InlineKeyboardButton().setText("Завершить все задачи!").setCallbackData("delete_task"));
-
         InlineKeyboardMarkup markupKeyboard = setUpInlineKeyboardMarkup(inlineKeyboardButtons);
 
         int idByUserId = dataBaseManager.getIdByUserId(update.getMessage().getFrom().getId());
@@ -175,6 +173,12 @@ public class MotivatorBotCommands implements Commands {
         }
     }
 
+    /**
+     * Provides basic InlineKeyboardMarkup configuration.
+     *
+     * @param buttonList
+     * @return
+     */
     private InlineKeyboardMarkup setUpInlineKeyboardMarkup(List<InlineKeyboardButton> buttonList) {
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         buttons.add(buttonList);
@@ -220,7 +224,7 @@ public class MotivatorBotCommands implements Commands {
     public void sendDefaultMessage(Update update, AbsSender absSender) {
         SendMessage sendMessage = new SendMessage()
                 .setChatId(update.getMessage().getChatId())
-                .setText(BotConfig.DEFAULT_MESSAGE);
+                .setText(BotConfig.MOTIVATOR_DEFAULT_MESSAGE);
 
         try {
             absSender.execute(sendMessage);
